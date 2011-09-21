@@ -1,5 +1,3 @@
-import "nginx"
-
 define psgi::app (
   $path,
   $domain,
@@ -30,7 +28,7 @@ define psgi::app (
       mode => 0770,
       owner => $owner,
       group => $group,
-      notify => Service[$name],
+#      notify => Service[$name],
   }
 
   service {

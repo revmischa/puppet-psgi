@@ -14,19 +14,24 @@ WORKERS=<%= workers %>
 MODULE=<%= appmodule %>
 SERVER=<%= server %>
 
+# start_server startup errors go here
+DAEMONLOG="$BASEDIR/server_starter.log"
+
 # user:group to run as
-CHUSER="<%= owner %>:<%= group %>"
+CHUSER="www:www"
 
 # pidfile location
-PIDDIR=/tmp
-PIDFILE=$PIDDIR/${NAME}.pid
+STATUSDIR=/tmp
+PIDFILE=$STATUSDIR/${NAME}.pid
+STATUSFILE=$STATUSDIR/${NAME}.status
 
 # app libs, assume in $BASEDIR/lib
 LIBDIR="$BASEDIR/lib"
 
 # daemon command
 DAEMON="/usr/local/bin/start_server"
-DAEMONARGS="--port=$PORT --pid-file $PIDFILE -- plackup -s $SERVER --max-workers=$WORKERS --app $PSGI -I$LIBDIR --daemonize"
+DAEMONARGS="--port=$PORT --pid-file $PIDFILE --status-file $STATUSFILE --interval=2 --log-file $DAEMONLOG"
+SERVERARGS="starman --workers=$WORKERS --app $PSGI -I$LIBDIR"
 
 # s-s-d command-line
 SSD="/sbin/start-stop-daemon --pidfile $PIDFILE --chdir $BASEDIR --startas $DAEMON -c $CHUSER -v"
@@ -35,6 +40,10 @@ check_running() {
     [ -s $PIDFILE ] && kill -0 $(cat $PIDFILE) >/dev/null 2>&1
 }
 
+hup() {
+    $DAEMON $DAEMONARGS --restart
+}
+ 
 check_compile() {
     if ( cd $BASEDIR ; perl -Ilib -M$MODULE -ce1 ) ; then
         return 1
@@ -44,70 +53,79 @@ check_compile() {
 }
 
 _start() {
-    echo ""
-    echo "Running $SSD --start -- $DAEMONARGS..."
-    echo ""
-    $SSD --start --background -- $DAEMONARGS
+    log_action_begin_msg "Starting $NAME" "$DAEMON"
+    echo
+    log_action_cont_msg "start_server arguments" "$DAEMONARGS"
+    echo
+    log_action_cont_msg "$SERVER arguments" "$SERVERARGS"
+    log_action_end_msg 0
 
+    $SSD --start --background -- $DAEMONARGS -- $SERVERARGS || return 1
+
+    log_success_msg "Backgrounded $NAME superserver. Log is at $DAEMONLOG"
     return 0
 }
 
 
 start() {
-    log_daemon_msg "Starting $NAME" $DAEMON
-    echo ""
-
     if check_running; then
-        log_progress_msg "already running"
-        log_end_msg 0
+        log_failure_msg "already running"
         exit 0
     fi
 
     rm -f $PIDFILE 2>/dev/null
 
     _start
-    log_end_msg $?
-    return $?
+    RET=$?
+    log_end_msg $RET
+    return $RET
 }
 
 stop() {
-    log_daemon_msg "Stopping $NAME" $DAEMON
-    echo ""
+    log_action_begin_msg "Stopping $NAME" $DAEMON
 
     $SSD --stop --oknodo
 
-    sleep 1
-    log_end_msg $?
-    return $?
+    RET=$?
+    log_action_end_msg $RET
+    return $RET
 }
 
 restart() {
-    log_daemon_msg "Restarting $NAME" $DAEMON
-    echo ""
-
-    if check_compile ; then
-        log_failure_msg "Error detected; not restarting."
-        log_end_msg 1
-        exit 4
+    if ! check_running; then
+        log_failure_msg "not running"
+        return 1
     fi
 
-    $SSD --stop --oknodo
+    log_action_begin_msg "Checking syntax for $MODULE"
 
-    _start
-    log_end_msg $?
-    return $?
+    if check_compile ; then
+        log_action_cont_msg "Error detected; not restarting."
+        log_action_end_msg 1
+        return 1
+    fi
+
+    log_action_cont_msg "Sending HUP"
+
+    if hup; then
+        log_action_end_msg 0
+        return 0
+    else
+        log_action_end_msg 1
+        return 1
+    fi
 }
 
 # need to update to return proper LSB status
 status() {
     if check_running; then
-        log_daemon_msg "$NAME" "running"
-        echo ""
-        exit 0
+        log_info_msg "$NAME: running"
+        echo
+        return 0
     else
-        log_daemon_msg "$NAME" "not running"
-        echo ""
-        exit 3
+        log_info_msg "$NAME: not running"
+        echo
+        return 3
     fi
 }
 
