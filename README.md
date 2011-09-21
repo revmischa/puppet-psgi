@@ -2,8 +2,10 @@
 
 ### Deploy PSGI applications with a plackup initscript and nginx reverse proxy configuration
 
+
 #### Dependencies:
 * [nginx puppet module](http://github.com/uggedal/puppet-module-nginx)
+
 
 
 #### Synopsis:
@@ -23,6 +25,8 @@
       group => 'www-data',               # group to run as
   }
 ```
+
+
 
 #### Caveats:
 * Right now this module assumes your app directory contains root/, root/static/ and lib/. Patches welcome to handle more generic cases.
