@@ -13,12 +13,14 @@ PSGI="$BASEDIR/<%= psgi %>"
 WORKERS=<%= workers %>
 MODULE=<%= appmodule %>
 SERVER=<%= server %>
+USER=<%= owner %>
+GROUP=<%= group %>
 
 # start_server startup errors go here
 DAEMONLOG="$BASEDIR/server_starter.log"
 
 # user:group to run as
-CHUSER="www:www"
+CHUSER="$USER:$GROUP"
 
 # pidfile location
 STATUSDIR=/tmp
@@ -35,6 +37,31 @@ SERVERARGS="starman --workers=$WORKERS --app $PSGI -I$LIBDIR"
 
 # s-s-d command-line
 SSD="/sbin/start-stop-daemon --pidfile $PIDFILE --chdir $BASEDIR --startas $DAEMON -c $CHUSER -v"
+
+
+############ CHECK LOGFILE PERMISSIONS
+
+# check log permissions
+unset LOGWRITEOK
+
+# parent directory writable?
+if [ $EUID = 0 ]; then
+    # run permissions tests as $USER:$GROUP
+    su -l $USER -c 'test -w "$DAEMONLOG"' && LOGWRITEOK=1
+    su -l $USER -c 'test \! -e "$DAEMONLOG" && test -w $BASEDIR' && LOGWRITEOK=1
+else
+    # test as current user
+    [[ -w "$DAEMONLOG" || ( ! -e "$DAEMONLOG" && -w "$BASEDIR" ) ]] && LOGWRITEOK=1
+fi
+
+if [ -z "$LOGWRITEOK" ]; then
+    log_failure_msg "Write access to the logfile $DAEMONLOG is required"
+    exit 4
+fi
+
+
+############
+
 
 check_running() {
     [ -s $PIDFILE ] && kill -0 $(cat $PIDFILE) >/dev/null 2>&1
@@ -126,6 +153,10 @@ status() {
         return 3
     fi
 }
+
+
+############
+
 
 # See how we were called.
 case "$1" in
