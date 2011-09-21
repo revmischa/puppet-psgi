@@ -53,9 +53,7 @@ check_compile() {
 }
 
 _start() {
-    log_action_begin_msg "Starting $NAME" "$DAEMON"
-    echo
-    log_action_cont_msg "start_server arguments" "$DAEMONARGS"
+    log_action_begin_msg "start_server arguments" "$DAEMONARGS"
     echo
     log_action_cont_msg "$SERVER arguments" "$SERVERARGS"
     log_action_end_msg 0
@@ -94,7 +92,7 @@ stop() {
 restart() {
     if ! check_running; then
         log_failure_msg "not running"
-        return 1
+        return 0
     fi
 
     log_action_begin_msg "Checking syntax for $MODULE"

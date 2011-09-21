@@ -17,7 +17,7 @@
       psgi => 'myapp.psgi',              # path to PSGI app, relative to path
       appmodule => 'MySite',             # webapp library. used for compilation
       workers => 3,                      # max number of child procs to spawn 
-      server => 'Starlet',               # webserver to use
+      server => 'Starman',               # webserver to use. only Starman works for now
       owner => 'www',                    # user to run as
       group => 'www',                    # group to run as
   }
