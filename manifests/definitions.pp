@@ -35,7 +35,6 @@ define psgi::app (
 
   service {
     "$name":
-      hasstatus => false,
       require => File[$initscript],
   }
 }

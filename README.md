@@ -24,4 +24,4 @@
 ```
 
 #### Caveats:
-* Right now this module assumes your app directory contains `root/`, `root/static/` and `lib/`. Patches welcome to handle more generic cases.
+* Right now this module assumes your app directory contains `root/`, `root/static/` and `lib/`. Patches are welcome for handling more generic cases.

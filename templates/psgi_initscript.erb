@@ -103,11 +103,11 @@ status() {
     if check_running; then
         log_daemon_msg "$NAME" "running"
         echo ""
-        return 1
+        exit 0
     else
         log_daemon_msg "$NAME" "not running"
         echo ""
-        return 0
+        exit 3
     fi
 }
 
