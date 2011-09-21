@@ -6,7 +6,7 @@ define psgi::app (
   $appmodule,
   $owner,
   $group,
-  $server,
+  $server='Starman',
   $workers=2,
   $aliases=[]
   ) {
@@ -28,7 +28,7 @@ define psgi::app (
       mode => 0770,
       owner => $owner,
       group => $group,
-#      notify => Service[$name],
+      notify => Service[$name],
   }
 
   service {
