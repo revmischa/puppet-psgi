@@ -1,24 +1,13 @@
 define psgi::app (
   $path,
-  $domain,
   $port,
   $psgi,
   $appmodule,
   $owner,
   $group,
   $server='Starman',
-  $workers=2,
-  $aliases=[]
+  $workers=2
   ) {
-
-  nginx::site {
-    $name:
-      domain => $domain,
-      root => "$path/root",
-      mediaprefix => "/static",
-      aliases => $aliases,
-      upstreams => [ "localhost:$port" ],
-  }
 
   $initscript = "/etc/init.d/$name"
 
@@ -27,12 +16,29 @@ define psgi::app (
       content => template("psgi/psgi_initscript.erb"),
       mode => 0770,
       owner => $owner,
-      group => $group,
-      notify => Service[$name],
+      group => $group;
   }
 
   service {
     "$name":
       require => File[$initscript],
+  }
+}
+
+define psgi::nginx (
+  $domain,
+  $root,
+  $static_dir="/static",
+  $aliases=[],
+  $port
+  ) {
+  
+  nginx::site {
+    $name:
+      domain => $domain,
+      root => $root,
+      mediaprefix => $static_dir,
+      aliases => $aliases,
+      upstreams => [ "localhost:$port" ],
   }
 }
