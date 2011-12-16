@@ -6,6 +6,7 @@ define psgi::app (
   $owner,
   $group,
   $server='Starman',
+  $start_server='start_server',
   $workers=2
   ) {
 
