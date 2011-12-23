@@ -15,6 +15,10 @@
 
 . /lib/lsb/init-functions
 
+<% if preload_script %>
+. <%= preload_script %>
+<% end %>
+
 # variables from puppet definition
 NAME=<%= name %>
 BASEDIR="<%= path %>"
@@ -25,6 +29,11 @@ MODULE=<%= appmodule %>
 SERVER=<%= server %>
 USER=<%= owner %>
 GROUP=<%= group %>
+
+<% if verbose %>
+# verbose
+export STARMAN_DEBUG=1
+<% end %>
 
 # start_server startup errors go here
 DAEMONLOG="$BASEDIR/server_starter.log"
@@ -129,7 +138,7 @@ stop() {
 restart() {
     if ! check_running; then
         log_failure_msg "not running"
-        return 0
+        return 1
     fi
 
     log_action_begin_msg "Checking syntax for $MODULE"

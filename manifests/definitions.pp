@@ -7,6 +7,8 @@ define psgi::app (
   $group,
   $server='Starman',
   $start_server='start_server',
+  $verbose=false,
+  $preload_script=false,
   $workers=2
   ) {
 
