@@ -10,14 +10,15 @@
 ```
   psgi::app {
     "mysite":
-      path => '/home/www/sites/mysite',  # directory containing root, lib
-      port => 5000,                      # port the PSGI app will listen on
-      psgi => 'myapp.psgi',              # path to PSGI app, relative to path
-      appmodule => 'MySite',             # webapp library. used for compilation
-      workers => 3,                      # max number of child procs to spawn 
-      server => 'Starman',               # webserver to use. only Starman works for now
-      owner => 'www',                    # user to run as
-      group => 'www',                    # group to run as
+      path => '/home/www/sites/mysite',   # directory containing root, lib
+      port => 5000,                       # port the PSGI app will listen on
+      psgi => 'myapp.psgi',               # path to PSGI app, relative to path
+      appmodule => 'MySite',              # webapp library. used for compilation
+      workers => 3,                       # max number of child procs to spawn 
+      preload_script => '/etc/myapp.env', # shell script to source
+      preload_modules => ['Catalyst'],    # modules to load in parent class, get memory savings via copy-on-write
+      owner => 'www',                     # user to run as
+      group => 'www',                     # group to run as
   }
 
   # nginx config

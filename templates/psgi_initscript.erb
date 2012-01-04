@@ -32,7 +32,9 @@ GROUP=<%= group %>
 
 <% if verbose %>
 # verbose
-export STARMAN_DEBUG=1
+STARMAN_DEBUG=1
+<% else %>
+STARMAN_DEBUG=0
 <% end %>
 
 # start_server startup errors go here
@@ -53,6 +55,13 @@ LIBDIR="$BASEDIR/lib"
 DAEMON="<%= start_server %>"
 DAEMONARGS="--port=$PORT --pid-file $PIDFILE --status-file $STATUSFILE --interval=2 --log-file $DAEMONLOG"
 SERVERARGS="starman --workers=$WORKERS --app $PSGI -I$LIBDIR"
+
+<% if preload_modules.any? %>
+# preload modules in master process
+<% preload_modules.each do |preload_module| %>
+SERVERARGS="$SERVERARGS -M<%= preload_module %>"
+<% end %>
+<% end %>
 
 # s-s-d command-line
 SSD="/sbin/start-stop-daemon --pidfile $PIDFILE --chdir $BASEDIR --startas $DAEMON -c $CHUSER -v"
