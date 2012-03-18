@@ -26,6 +26,10 @@ define psgi::app (
       group => $group;
   }
 
+  cpanm::module {
+    ['Server::Starter', "Net::Server::SS::PreFork" ]:
+  }
+
   service {
     "$name":
       require => File[$initscript],
@@ -37,11 +41,19 @@ define psgi::nginx (
   $root,
   $static_dir="/static",
   $aliases=[],
+  $owner=undef,
+  $group=undef,
+  $ssl_cert=undef,
+  $ssl_key=undef,
   $port
   ) {
   
   nginx::site {
     $name:
+      ssl_cert => $ssl_cert,
+      ssl_key => $ssl_key,
+      owner => $owner,
+      group => $group,
       domain => $domain,
       root => $root,
       mediaprefix => $static_dir,
