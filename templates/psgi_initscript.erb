@@ -52,7 +52,13 @@ STATUSFILE=$STATUSDIR/${NAME}.status
 LIBDIR="$BASEDIR/lib"
 
 # daemon command (make sure this is in your $PATH)
-DAEMON="<%= start_server %>"
+if [[ -e /usr/local/bin/start_server ]]; then
+    # sometimes S-S-D really really wants an absolute path
+    DAEMON=/usr/local/bin/start_server
+else
+    DAEMON=start_server
+fi
+
 DAEMONARGS="--port=$PORT --pid-file $PIDFILE --status-file $STATUSFILE --interval=2 --log-file $DAEMONLOG"
 SERVERARGS="starman --workers=$WORKERS --app $PSGI -I$LIBDIR"
 

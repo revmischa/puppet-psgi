@@ -9,7 +9,6 @@ define psgi::app (
   $owner,
   $group,
   $server='Starman',
-  $start_server='start_server',
   $verbose=false,
   $preload_script=false,
   $preload_modules=[],
@@ -26,9 +25,9 @@ define psgi::app (
       group => $group;
   }
 
-  cpanm::module {
-    ['Server::Starter', "Net::Server::SS::PreFork" ]:
-  }
+  #cpanm::module {
+  #  ['Server::Starter', "Net::Server::SS::PreFork" ]:
+  #}
 
   service {
     "$name":
@@ -46,6 +45,7 @@ define psgi::nginx (
   $ssl_cert="",
   $ssl_key="",
   $ssl=false,
+  $bind_ip="",
   $port
   ) {
   
@@ -54,6 +54,7 @@ define psgi::nginx (
       ssl_certificate => $ssl_cert,
       ssl_certificate_key => $ssl_key,
       ssl => $ssl,
+      bind_ip => $bind_ip,
       owner => $owner,
       group => $group,
       domain => $domain,
