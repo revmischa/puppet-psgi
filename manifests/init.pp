@@ -43,15 +43,17 @@ define psgi::nginx (
   $aliases=[],
   $owner=undef,
   $group=undef,
-  $ssl_cert=undef,
-  $ssl_key=undef,
+  $ssl_cert="",
+  $ssl_key="",
+  $ssl=false,
   $port
   ) {
   
   nginx::site {
     $name:
-      ssl_cert => $ssl_cert,
-      ssl_key => $ssl_key,
+      ssl_certificate => $ssl_cert,
+      ssl_certificate_key => $ssl_key,
+      ssl => $ssl,
       owner => $owner,
       group => $group,
       domain => $domain,
