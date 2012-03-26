@@ -29,6 +29,7 @@ MODULE=<%= appmodule %>
 SERVER=<%= server %>
 USER=<%= owner %>
 GROUP=<%= group %>
+PLACK_SERVER_MODULE=<%= server %>
 
 <% if verbose %>
 # verbose
@@ -70,7 +71,7 @@ else
 fi
 
 DAEMONARGS="--port=$PORT --pid-file $PIDFILE --status-file $STATUSFILE --interval=2 --log-file $DAEMONLOG"
-SERVERARGS="starman --workers=$WORKERS --app $PSGI -I$LIBDIR"
+SERVERARGS="plackup -s $PLACK_SERVER_MODULE --workers=$WORKERS --app $PSGI -I$LIBDIR"
 
 <% if preload_modules.any? %>
 # preload modules in master process
@@ -116,7 +117,9 @@ hup() {
 }
  
 check_compile() {
-    if ( cd $BASEDIR ; perl -Ilib -M$MODULE -ce1 ) ; then
+    CHECKMODULE=""
+    [ ! -nz "$MODULE" ] && CHECKMODULE="-M$MODULE";
+    if ( cd $BASEDIR ; perl -Ilib $CHECKMODULE -ce1 ) ; then
         return 1
     else
         return 0

@@ -8,7 +8,7 @@ define psgi::app (
   $path,
   $port,
   $psgi,
-  $appmodule,
+  $appmodule=false,
   $owner,
   $group,
   $server='Starman',
