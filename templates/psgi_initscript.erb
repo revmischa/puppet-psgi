@@ -43,6 +43,16 @@ DAEMONLOG="$BASEDIR/server_starter.log"
 # user:group to run as
 CHUSER="$USER:$GROUP"
 
+# perl5 lib in homedir?
+eval PERLLOCAL=~$USER/perl5
+if [[ -d "$PERLLOCAL" ]]; then
+    export PERL_LOCAL_LIB_ROOT="$PERLLOCAL";
+    export PERL_MB_OPT="--install_base $PERLLOCAL";
+    export PERL_MM_OPT="INSTALL_BASE=$PERLLOCAL";
+    export PERL5LIB="$PERLLOCAL/lib/perl5/x86_64-linux-gnu-thread-multi:$PERLLOCAL/lib/perl5";
+    export PATH="$PERLLOCAL/bin:$PATH";
+fi
+
 # pidfile location
 STATUSDIR=/tmp
 PIDFILE=$STATUSDIR/${NAME}.pid
@@ -119,7 +129,9 @@ _start() {
     log_action_cont_msg "$SERVER arguments" "$SERVERARGS"
     log_action_end_msg 0
 
-    $SSD --start --background -- $DAEMONARGS -- $SERVERARGS || return 1
+    BACKGROUND="--background"
+    if [[ $TEST ]]; then BACKGROUND=""; fi
+    $SSD --start $BACKGROUND -- $DAEMONARGS -- $SERVERARGS || return 1
 
     log_success_msg "Backgrounded $NAME superserver. Log is at $DAEMONLOG "
     return 0

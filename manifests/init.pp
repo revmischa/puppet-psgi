@@ -1,4 +1,7 @@
 class psgi {
+  cpanm::module {
+    ['Server::Starter', "Net::Server::SS::PreFork", 'Starman']:
+  }
 }
 
 define psgi::app (
@@ -24,11 +27,7 @@ define psgi::app (
       owner => $owner,
       group => $group;
   }
-
-  #cpanm::module {
-  #  ['Server::Starter', "Net::Server::SS::PreFork" ]:
-  #}
-
+  
   service {
     "$name":
       require => File[$initscript],
