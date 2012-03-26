@@ -118,7 +118,7 @@ hup() {
  
 check_compile() {
     CHECKMODULE=""
-    [ ! -nz "$MODULE" ] && CHECKMODULE="-M$MODULE";
+    [ ! -z "$MODULE" ] && CHECKMODULE="-M$MODULE";
     if ( cd $BASEDIR ; perl -Ilib $CHECKMODULE -ce1 ) ; then
         return 1
     else
