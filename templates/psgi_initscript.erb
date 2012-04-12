@@ -70,8 +70,8 @@ else
     DAEMON=start_server
 fi
 
-DAEMONARGS="--port=$PORT --pid-file $PIDFILE --status-file $STATUSFILE --interval=2 --log-file $DAEMONLOG"
-SERVERARGS="plackup -s $PLACK_SERVER_MODULE --workers=$WORKERS --app $PSGI -I$LIBDIR"
+DAEMONARGS="--pid-file $PIDFILE --status-file $STATUSFILE --interval=2 --log-file $DAEMONLOG"
+SERVERARGS="plackup -s $PLACK_SERVER_MODULE --workers=$WORKERS --app $PSGI -I$LIBDIR --port=$PORT"
 
 <% if preload_modules.any? %>
 # preload modules in master process

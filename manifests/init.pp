@@ -45,6 +45,7 @@ define psgi::nginx (
   $ssl_key="",
   $ssl=false,
   $bind_ip="",
+  $hippie_upstreams=[],
   $port
   ) {
   
@@ -61,6 +62,7 @@ define psgi::nginx (
       mediaprefix => $static_dir,
       aliases => $aliases,
       upstreams => [ "localhost:$port" ],
+      hippie_upstreams => $hippie_upstreams,
   }
 }
 
