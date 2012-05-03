@@ -53,7 +53,7 @@ LIBDIR="$BASEDIR/lib"
 
 # daemon command (make sure this is in your $PATH)
 DAEMON="<%= start_server %>"
-DAEMONARGS="--port=$PORT --pid-file $PIDFILE --status-file $STATUSFILE --interval=2 --log-file $DAEMONLOG"
+DAEMONARGS="--port=$PORT --pid-file $PIDFILE --status-file $STATUSFILE --interval=30 --log-file $DAEMONLOG --signal-on-hup=QUIT"
 SERVERARGS="starman --workers=$WORKERS --app $PSGI -I$LIBDIR"
 
 <% if preload_modules.any? %>
