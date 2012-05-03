@@ -1,15 +1,17 @@
 class psgi {
+  cpanm::module {
+    ['Server::Starter', "Net::Server::SS::PreFork", 'Starman']:
+  }
 }
 
 define psgi::app (
   $path,
   $port,
   $psgi,
-  $appmodule,
+  $appmodule=false,
   $owner,
   $group,
   $server='Starman',
-  $start_server='start_server',
   $verbose=false,
   $preload_script=false,
   $preload_modules=[],
@@ -25,7 +27,7 @@ define psgi::app (
       owner => $owner,
       group => $group;
   }
-
+  
   service {
     "$name":
       require => File[$initscript],
@@ -37,16 +39,30 @@ define psgi::nginx (
   $root,
   $static_dir="/static",
   $aliases=[],
+  $owner=undef,
+  $group=undef,
+  $ssl_cert="",
+  $ssl_key="",
+  $ssl=false,
+  $bind_ip="",
+  $hippie_upstreams=[],
   $port
   ) {
   
   nginx::site {
     $name:
+      ssl_certificate => $ssl_cert,
+      ssl_certificate_key => $ssl_key,
+      ssl => $ssl,
+      bind_ip => $bind_ip,
+      owner => $owner,
+      group => $group,
       domain => $domain,
       root => $root,
       mediaprefix => $static_dir,
       aliases => $aliases,
       upstreams => [ "localhost:$port" ],
+      hippie_upstreams => $hippie_upstreams,
   }
 }
 
