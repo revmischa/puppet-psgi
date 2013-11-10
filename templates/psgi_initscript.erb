@@ -32,7 +32,9 @@ GROUP=<%= group %>
 PLACK_SERVER_MODULE=<%= server %>
 
 # how long to wait for new process when doing graceful restarts
-INTERVAL=30
+RESTART_INTERVAL=<%= restart_delay %>
+
+SPAWN_INTERVAL=<%= spawn_interval %>
 
 <% if verbose %>
 # verbose
@@ -65,16 +67,27 @@ STATUSFILE=$STATUSDIR/${NAME}.status
 # app libs, assume in $BASEDIR/lib
 LIBDIR="$BASEDIR/lib"
 
-# daemon command (make sure this is in your $PATH if possible)
+# daemon command (make sure this is in your $PATH if possible)                                                                                                                     
 if [[ -e /usr/local/bin/start_server ]]; then
     # sometimes S-S-D really really wants an absolute path
     DAEMON=/usr/local/bin/start_server
+elif [[ -e $PERLLOCAL/bin/start_server ]]; then
+    DAEMON=$PERLLOCAL/bin/start_server
 else
+    echo "System start_server was not found. Please install it."
     DAEMON=start_server
 fi
 
-DAEMONARGS="--port=$PORT --pid-file $PIDFILE --status-file $STATUSFILE --interval=$INTERVAL --log-file $DAEMONLOG --signal-on-hup=QUIT"
-SERVERARGS="plackup -s $PLACK_SERVER_MODULE --workers=$WORKERS --app $PSGI -I$LIBDIR -E deployment"
+DAEMONARGS="--port=$PORT --pid-file $PIDFILE --status-file $STATUSFILE --log-file $DAEMONLOG --interval=$RESTART_INTERVAL"
+SERVERARGS="plackup -s $PLACK_SERVER_MODULE --app $PSGI -I$LIBDIR -E deployment"
+if [[ "$PLACK_SERVER_MODULE" = 'Starman' ]]; then
+    # Starman
+    DAEMONARGS="$DAEMONARGS --signal-on-hup=QUIT"
+    SERVERARGS="$SERVERARGS --workers=$WORKERS"
+else
+    # assume Starlet/Monoceros
+    SERVERARGS="$SERVERARGS --max-workers=$WORKERS --spawn-interval=$SPAWN_INTERVAL"
+fi
 
 <% if preload_modules.any? %>
 # preload modules in master process
@@ -132,7 +145,7 @@ check_compile() {
 _start() {
     log_action_begin_msg "start_server arguments" "$DAEMONARGS"
     echo
-    log_action_cont_msg "$SERVER arguments" "$SERVERARGS"
+    log_action_cont_msg "$PLACK_SERVER_MODULE arguments" "$SERVERARGS"
     log_action_end_msg 0
 
     BACKGROUND="--background"

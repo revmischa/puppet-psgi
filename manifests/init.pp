@@ -15,6 +15,8 @@ define psgi::app (
   $verbose=false,
   $preload_script=false,
   $preload_modules=[],
+  $restart_delay=1, # how long to wait for new procs in restart
+  $spawn_interval=0,
   $workers=2
   ) {
 
